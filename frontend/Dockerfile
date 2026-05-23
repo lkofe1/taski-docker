@@ -1,18 +1,13 @@
-FROM node:18-alpine as build
-
+# Этап 1: Сборка проекта
+FROM node:18-alpine AS build
 WORKDIR /app
-
 COPY package*.json ./
-
 RUN npm install
-
 COPY . .
-
 RUN npm run build
 
-# Раздаем собранную статику через легковесный сервер alpine
+# Этап 2: Подготовка статики
 FROM alpine:latest
-RUN apk add --no-cache static-server
 WORKDIR /app
-COPY --from=build /app/build ./
-CMD ["static-server", "-p", "3000"]
+# Просто копируем результат сборки из первого этапа в текущий контейнер
+COPY --from=build /app/build ./build
